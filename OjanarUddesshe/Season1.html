@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Season 1 - PDF eBook</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    header {
+      background-color: #333;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #444;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 0.5rem 0;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      padding: 0.5rem;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    main {
+      padding: 1rem;
+      text-align: center;
+    }
+
+    canvas {
+      max-width: 100%;
+      border: 1px solid #ccc;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .controls {
+      margin: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 1em;
+      background-color: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    footer {
+      text-align: center;
+      color: #777;
+      font-size: 0.9em;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 600px) {
+      nav a {
+        display: block;
+        margin: 10px;
+      }
+    }
+  </style>
+</head>
+<body oncontextmenu="return false">
+
+  <header>
+    <h1>অজানার উদ্দেশ্যে S-1</h1>
+  </header>
+
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="../social.html">Social</a>
+  </nav>
+
+  <main>
+    <div class="controls">
+      <button onclick="prevPage()">⟨ Prev</button>
+      <span id="page-num">Page 1</span>
+      <button onclick="nextPage()">Next ⟩</button>
+    </div>
+
+    <canvas id="pdf-canvas"></canvas>
+  </main>
+
+  <footer>@Eco Creations 2025</footer>
+
+  <script>
+    const url = 'season1.pdf'; // Place your PDF file here
+
+    let pdfDoc = null,
+        pageNum = 1,
+        canvas = document.getElementById('pdf-canvas'),
+        ctx = canvas.getContext('2d');
+
+    // Load the PDF
+    pdfjsLib.getDocument(url).promise.then(function (pdf) {
+      pdfDoc = pdf;
+      renderPage(pageNum);
+    });
+
+    function renderPage(num) {
+      pdfDoc.getPage(num).then(function (page) {
+        const viewport = page.getViewport({ scale: 1.5 });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        const renderContext = {
+          canvasContext: ctx,
+          viewport: viewport
+        };
+        page.render(renderContext);
+        document.getElementById('page-num').textContent = `Page ${num}`;
+      });
+    }
+
+    function nextPage() {
+      if (pageNum < pdfDoc.numPages) {
+        pageNum++;
+        renderPage(pageNum);
+      }
+    }
+
+    function prevPage() {
+      if (pageNum > 1) {
+        pageNum--;
+        renderPage(pageNum);
+      }
+    }
+
+    // Prevent right-click, drag, and copy
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    document.addEventListener("dragstart", e => e.preventDefault());
+    document.addEventListener("selectstart", e => e.preventDefault());
+
+    // Swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    canvas.addEventListener("touchstart", function(e) {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    canvas.addEventListener("touchend", function(e) {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+    function handleSwipe() {
+      const threshold = 50;
+      if (touchEndX < touchStartX - threshold) {
+        nextPage();
+      } else if (touchEndX > touchStartX + threshold) {
+        prevPage();
+      }
+    }
+  </script>
+
+</body>
+</html>
